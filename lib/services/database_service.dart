@@ -1,150 +1,118 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/models.dart';
 
-/// Single SQLite database for all Vital data. One file, five tables.
+/// Stores all Vital data in Firestore under users/{uid}/.
+/// Data is per-user and syncs across devices automatically.
 class DatabaseService {
   DatabaseService._();
   static final DatabaseService instance = DatabaseService._();
 
-  static Database? _db;
+  final _db = FirebaseFirestore.instance;
 
-  Future<Database> get database async {
-    _db ??= await _init();
-    return _db!;
-  }
+  String? get _uid => FirebaseAuth.instance.currentUser?.uid;
 
-  Future<Database> _init() async {
-    final path = join(await getDatabasesPath(), 'vital.db');
-    return openDatabase(
-      path,
-      version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE steps(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT NOT NULL,
-            steps INTEGER NOT NULL
-          )''');
-        await db.execute('''
-          CREATE TABLE workouts(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT NOT NULL,
-            type TEXT NOT NULL,
-            durationMin INTEGER NOT NULL,
-            calories INTEGER NOT NULL
-          )''');
-        await db.execute('''
-          CREATE TABLE meals(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT NOT NULL,
-            name TEXT NOT NULL,
-            mealType TEXT NOT NULL,
-            calories INTEGER NOT NULL
-          )''');
-        await db.execute('''
-          CREATE TABLE medications(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            dosage TEXT NOT NULL,
-            hour INTEGER NOT NULL,
-            minute INTEGER NOT NULL,
-            active INTEGER NOT NULL
-          )''');
-        await db.execute('''
-          CREATE TABLE sleep(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT NOT NULL,
-            hours REAL NOT NULL,
-            quality INTEGER NOT NULL
-          )''');
-      },
-    );
-  }
+  CollectionReference<Map<String, dynamic>> _col(String name) =>
+      _db.collection('users').doc(_uid).collection(name);
 
   // ---- Steps ----
+
   Future<void> upsertSteps(StepEntry e) async {
-    final db = await database;
-    final existing = await db.query('steps', where: 'date = ?', whereArgs: [e.date]);
-    if (existing.isEmpty) {
-      await db.insert('steps', e.toMap()..remove('id'));
-    } else {
-      await db.update('steps', {'steps': e.steps}, where: 'date = ?', whereArgs: [e.date]);
-    }
+    if (_uid == null) return;
+    await _col('steps').doc(e.date).set({'date': e.date, 'steps': e.steps});
   }
 
   Future<List<StepEntry>> getSteps({int days = 7}) async {
-    final db = await database;
-    final rows = await db.query('steps', orderBy: 'date DESC', limit: days);
-    return rows.map(StepEntry.fromMap).toList();
+    if (_uid == null) return [];
+    final snap = await _col('steps')
+        .orderBy('date', descending: true)
+        .limit(days)
+        .get();
+    return snap.docs
+        .map((d) => StepEntry.fromMap({'id': d.id, ...d.data()}))
+        .toList();
   }
 
   // ---- Workouts ----
+
   Future<void> addWorkout(Workout w) async {
-    final db = await database;
-    await db.insert('workouts', w.toMap()..remove('id'));
+    if (_uid == null) return;
+    await _col('workouts').add(w.toMap());
   }
 
   Future<List<Workout>> getWorkouts() async {
-    final db = await database;
-    final rows = await db.query('workouts', orderBy: 'date DESC, id DESC');
-    return rows.map(Workout.fromMap).toList();
+    if (_uid == null) return [];
+    final snap =
+        await _col('workouts').orderBy('date', descending: true).get();
+    return snap.docs
+        .map((d) => Workout.fromMap({'id': d.id, ...d.data()}))
+        .toList();
   }
 
-  Future<void> deleteWorkout(int id) async {
-    final db = await database;
-    await db.delete('workouts', where: 'id = ?', whereArgs: [id]);
+  Future<void> deleteWorkout(String id) async {
+    if (_uid == null) return;
+    await _col('workouts').doc(id).delete();
   }
 
   // ---- Meals ----
+
   Future<void> addMeal(Meal m) async {
-    final db = await database;
-    await db.insert('meals', m.toMap()..remove('id'));
+    if (_uid == null) return;
+    await _col('meals').add(m.toMap());
   }
 
   Future<List<Meal>> getMeals(String date) async {
-    final db = await database;
-    final rows = await db.query('meals', where: 'date = ?', whereArgs: [date], orderBy: 'id DESC');
-    return rows.map(Meal.fromMap).toList();
+    if (_uid == null) return [];
+    final snap =
+        await _col('meals').where('date', isEqualTo: date).get();
+    return snap.docs
+        .map((d) => Meal.fromMap({'id': d.id, ...d.data()}))
+        .toList();
   }
 
-  Future<void> deleteMeal(int id) async {
-    final db = await database;
-    await db.delete('meals', where: 'id = ?', whereArgs: [id]);
+  Future<void> deleteMeal(String id) async {
+    if (_uid == null) return;
+    await _col('meals').doc(id).delete();
   }
 
   // ---- Medications ----
-  Future<int> addMedication(Medication m) async {
-    final db = await database;
-    return db.insert('medications', m.toMap()..remove('id'));
+
+  Future<String> addMedication(Medication m) async {
+    if (_uid == null) return '';
+    final ref = await _col('medications').add(m.toMap());
+    return ref.id;
   }
 
   Future<List<Medication>> getMedications() async {
-    final db = await database;
-    final rows = await db.query('medications', orderBy: 'hour, minute');
-    return rows.map(Medication.fromMap).toList();
+    if (_uid == null) return [];
+    final snap = await _col('medications').orderBy('hour').get();
+    return snap.docs
+        .map((d) => Medication.fromMap({'id': d.id, ...d.data()}))
+        .toList();
   }
 
-  Future<void> deleteMedication(int id) async {
-    final db = await database;
-    await db.delete('medications', where: 'id = ?', whereArgs: [id]);
+  Future<void> deleteMedication(String id) async {
+    if (_uid == null) return;
+    await _col('medications').doc(id).delete();
   }
 
   // ---- Sleep ----
+
   Future<void> upsertSleep(SleepEntry s) async {
-    final db = await database;
-    final existing = await db.query('sleep', where: 'date = ?', whereArgs: [s.date]);
-    if (existing.isEmpty) {
-      await db.insert('sleep', s.toMap()..remove('id'));
-    } else {
-      await db.update('sleep', {'hours': s.hours, 'quality': s.quality},
-          where: 'date = ?', whereArgs: [s.date]);
-    }
+    if (_uid == null) return;
+    await _col('sleep')
+        .doc(s.date)
+        .set({'date': s.date, 'hours': s.hours, 'quality': s.quality});
   }
 
   Future<List<SleepEntry>> getSleep({int days = 7}) async {
-    final db = await database;
-    final rows = await db.query('sleep', orderBy: 'date DESC', limit: days);
-    return rows.map(SleepEntry.fromMap).toList();
+    if (_uid == null) return [];
+    final snap = await _col('sleep')
+        .orderBy('date', descending: true)
+        .limit(days)
+        .get();
+    return snap.docs
+        .map((d) => SleepEntry.fromMap({'id': d.id, ...d.data()}))
+        .toList();
   }
 }

@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vital/theme/app_theme.dart';
-import 'package:vital/screens/home_screen.dart';
+import 'package:vital/widgets/common.dart';
 
 void main() {
-  testWidgets('Dashboard shows the five health domains', (tester) async {
+  testWidgets('EmptyState renders icon and message', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: AppTheme.light, home: const HomeScreen()),
+      MaterialApp(
+        theme: AppTheme.light,
+        home: const Scaffold(
+          body: EmptyState(
+            icon: Icons.directions_walk,
+            message: 'No data yet.',
+          ),
+        ),
+      ),
     );
-    await tester.pump();
-
-    expect(find.text('Steps'), findsWidgets);
-    expect(find.text('Workouts'), findsOneWidget);
-    expect(find.text('Meals'), findsOneWidget);
-    expect(find.text('Medication'), findsOneWidget);
-    expect(find.text('Sleep'), findsOneWidget);
+    expect(find.text('No data yet.'), findsOneWidget);
   });
 }

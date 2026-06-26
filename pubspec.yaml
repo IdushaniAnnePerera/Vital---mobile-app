@@ -11,13 +11,14 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
   provider: ^6.1.2
-  sqflite: ^2.3.3
-  path: ^1.9.0
   fl_chart: ^0.68.0
-  flutter_local_notifications: ^17.2.2
   intl: ^0.19.0
   shared_preferences: ^2.2.3
-  timezone: ^0.9.4
+  # Firebase — powers auth + cloud storage (replaces sqflite for web support)
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.4.4
+  google_sign_in: ^6.2.1
 
 dev_dependencies:
   flutter_test:

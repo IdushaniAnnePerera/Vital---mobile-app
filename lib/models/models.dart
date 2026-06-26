@@ -1,20 +1,20 @@
-/// Data models for Vital. Each maps to a SQLite table row.
+/// Data models for Vital. IDs are Firestore document ID strings.
 
 class StepEntry {
-  final int? id;
+  final String? id;
   final String date; // yyyy-MM-dd
   final int steps;
 
   StepEntry({this.id, required this.date, required this.steps});
 
-  Map<String, dynamic> toMap() => {'id': id, 'date': date, 'steps': steps};
+  Map<String, dynamic> toMap() => {'date': date, 'steps': steps};
 
   factory StepEntry.fromMap(Map<String, dynamic> m) =>
-      StepEntry(id: m['id'], date: m['date'], steps: m['steps']);
+      StepEntry(id: m['id'] as String?, date: m['date'], steps: m['steps']);
 }
 
 class Workout {
-  final int? id;
+  final String? id;
   final String date;
   final String type; // e.g. Run, Strength, Yoga
   final int durationMin;
@@ -29,7 +29,6 @@ class Workout {
   });
 
   Map<String, dynamic> toMap() => {
-        'id': id,
         'date': date,
         'type': type,
         'durationMin': durationMin,
@@ -37,7 +36,7 @@ class Workout {
       };
 
   factory Workout.fromMap(Map<String, dynamic> m) => Workout(
-        id: m['id'],
+        id: m['id'] as String?,
         date: m['date'],
         type: m['type'],
         durationMin: m['durationMin'],
@@ -46,7 +45,7 @@ class Workout {
 }
 
 class Meal {
-  final int? id;
+  final String? id;
   final String date;
   final String name;
   final String mealType; // Breakfast, Lunch, Dinner, Snack
@@ -61,7 +60,6 @@ class Meal {
   });
 
   Map<String, dynamic> toMap() => {
-        'id': id,
         'date': date,
         'name': name,
         'mealType': mealType,
@@ -69,7 +67,7 @@ class Meal {
       };
 
   factory Meal.fromMap(Map<String, dynamic> m) => Meal(
-        id: m['id'],
+        id: m['id'] as String?,
         date: m['date'],
         name: m['name'],
         mealType: m['mealType'],
@@ -78,7 +76,7 @@ class Meal {
 }
 
 class Medication {
-  final int? id;
+  final String? id;
   final String name;
   final String dosage;
   final int hour; // reminder time
@@ -95,26 +93,25 @@ class Medication {
   });
 
   Map<String, dynamic> toMap() => {
-        'id': id,
         'name': name,
         'dosage': dosage,
         'hour': hour,
         'minute': minute,
-        'active': active ? 1 : 0,
+        'active': active,
       };
 
   factory Medication.fromMap(Map<String, dynamic> m) => Medication(
-        id: m['id'],
+        id: m['id'] as String?,
         name: m['name'],
         dosage: m['dosage'],
         hour: m['hour'],
         minute: m['minute'],
-        active: m['active'] == 1,
+        active: m['active'] == true || m['active'] == 1,
       );
 }
 
 class SleepEntry {
-  final int? id;
+  final String? id;
   final String date; // the morning you woke
   final double hours;
   final int quality; // 1–5
@@ -127,10 +124,10 @@ class SleepEntry {
   });
 
   Map<String, dynamic> toMap() =>
-      {'id': id, 'date': date, 'hours': hours, 'quality': quality};
+      {'date': date, 'hours': hours, 'quality': quality};
 
   factory SleepEntry.fromMap(Map<String, dynamic> m) => SleepEntry(
-        id: m['id'],
+        id: m['id'] as String?,
         date: m['date'],
         hours: (m['hours'] as num).toDouble(),
         quality: m['quality'],

@@ -84,8 +84,8 @@ class _MedsScreenState extends State<MedsScreen> {
                     icon: const Icon(Icons.access_time, size: 18),
                     label: Text(_fmtTime(time.hour, time.minute)),
                     onPressed: () async {
-                      final picked = await showTimePicker(
-                          context: ctx, initialTime: time);
+                      final picked =
+                          await showTimePicker(context: ctx, initialTime: time);
                       if (picked != null) setSheet(() => time = picked);
                     },
                   ),
@@ -114,7 +114,7 @@ class _MedsScreenState extends State<MedsScreen> {
         hour: time.hour,
         minute: time.minute,
       );
-      final id = await _db.addMedication(med);
+      final id = await _db.addMedication(med); // String id from Firestore
       await NotificationService.instance.scheduleDaily(
         id: id,
         title: 'Time for ${med.name}',
@@ -168,8 +168,7 @@ class _MedsScreenState extends State<MedsScreen> {
                               color: AppColors.meds),
                         ),
                         title: Text(m.name,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w700)),
+                            style: const TextStyle(fontWeight: FontWeight.w700)),
                         subtitle: Text(
                             '${m.dosage.isEmpty ? "—" : m.dosage} · ${_fmtTime(m.hour, m.minute)} daily'),
                         trailing: IconButton(
