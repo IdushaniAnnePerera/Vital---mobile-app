@@ -214,7 +214,7 @@ class _SleepLine extends StatelessWidget {
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: AppColors.sleep.withOpacity(0.12),
+              color: const Color(0x1F3C5C9E), // sleep @ 12%
             ),
             spots: [
               for (var i = 0; i < entries.length; i++)

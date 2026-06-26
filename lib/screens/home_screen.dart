@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/auth_service.dart';
@@ -241,8 +242,6 @@ class _AccountButton extends StatelessWidget {
   }
 }
 
-// Extracted helper so _DomainCard can create semi-transparent domain colours
-// without calling the deprecated withOpacity method.
 Color _domainTint(Color c, int alpha255) => Color.fromARGB(
       alpha255,
       (c.value >> 16) & 0xFF,
