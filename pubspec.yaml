@@ -1,0 +1,28 @@
+name: vital
+description: A personal health and fitness companion — steps, workouts, meals, medication, and sleep in one place.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  provider: ^6.1.2
+  sqflite: ^2.3.3
+  path: ^1.9.0
+  fl_chart: ^0.68.0
+  flutter_local_notifications: ^17.2.2
+  intl: ^0.19.0
+  shared_preferences: ^2.2.3
+  timezone: ^0.9.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
