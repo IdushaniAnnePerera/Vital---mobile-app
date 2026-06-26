@@ -2,6 +2,17 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 
+// Pre-computed white-with-alpha constants (avoids deprecated withOpacity)
+const _w11 = Color(0x1CFFFFFF); // white @ 11%
+const _w12 = Color(0x1FFFFFFF); // white @ 12%
+const _w15 = Color(0x26FFFFFF); // white @ 15%
+const _w20 = Color(0x33FFFFFF); // white @ 20%
+const _w22 = Color(0x38FFFFFF); // white @ 22%
+const _w25 = Color(0x40FFFFFF); // white @ 25%
+const _w30 = Color(0x4DFFFFFF); // white @ 30%
+const _w65 = Color(0xA6FFFFFF); // white @ 65%
+const _w75 = Color(0xBFFFFFFF); // white @ 75%
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
   @override
@@ -19,10 +30,12 @@ class _LoginScreenState extends State<LoginScreen>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1000));
+        vsync: this, duration: const Duration(milliseconds: 900));
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
-    _slide = Tween(begin: const Offset(0, 0.08), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
+    _slide = Tween(
+      begin: const Offset(0, 0.08),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
     _ctrl.forward();
   }
 
@@ -53,23 +66,20 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF082726),
-              Color(0xFF0E7C7B),
-              Color(0xFF0D4F7C),
-            ],
+            colors: [Color(0xFF082726), Color(0xFF0E7C7B), Color(0xFF0D4F7C)],
             stops: [0.0, 0.55, 1.0],
           ),
         ),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 440),
                 child: FadeTransition(
@@ -79,7 +89,21 @@ class _LoginScreenState extends State<LoginScreen>
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _Logo(),
+                        // Logo
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: _w15,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: _w30, width: 1.5),
+                          ),
+                          child: const Icon(
+                            Icons.favorite_rounded,
+                            color: Colors.white,
+                            size: 40,
+                          ),
+                        ),
                         const SizedBox(height: 28),
                         const Text(
                           'Vital',
@@ -91,19 +115,92 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
+                        const Text(
                           'Your personal health companion',
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.white.withOpacity(0.75),
+                            color: _w75,
                             fontWeight: FontWeight.w400,
                             letterSpacing: 0.2,
                           ),
                         ),
                         const SizedBox(height: 44),
-                        _FeatureRow(),
+                        // Feature chips
+                        const Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          alignment: WrapAlignment.center,
+                          children: [
+                            _Chip(
+                                icon: Icons.directions_walk_rounded,
+                                label: 'Steps'),
+                            _Chip(
+                                icon: Icons.fitness_center_rounded,
+                                label: 'Workouts'),
+                            _Chip(
+                                icon: Icons.restaurant_rounded,
+                                label: 'Meals'),
+                            _Chip(
+                                icon: Icons.medication_rounded,
+                                label: 'Meds'),
+                            _Chip(
+                                icon: Icons.bedtime_rounded,
+                                label: 'Sleep'),
+                          ],
+                        ),
                         const SizedBox(height: 44),
-                        _SignInCard(loading: _loading, onSignIn: _signIn),
+                        // Sign-in card
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(28),
+                          decoration: BoxDecoration(
+                            color: _w11,
+                            borderRadius: BorderRadius.circular(28),
+                            border: Border.all(color: _w22, width: 1.5),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Get started',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Sign in to track and sync your health',
+                                style: TextStyle(
+                                    fontSize: 14, color: _w65),
+                              ),
+                              const SizedBox(height: 28),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 52,
+                                child: _loading
+                                    ? const Center(
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2.5,
+                                        ),
+                                      )
+                                    : _GoogleButton(onPressed: _signIn),
+                              ),
+                              const SizedBox(height: 16),
+                              const Center(
+                                child: Text(
+                                  'Your data is private and belongs to you.',
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: _w25),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -113,44 +210,6 @@ class _LoginScreenState extends State<LoginScreen>
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Logo extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
-      ),
-      child: const Icon(Icons.favorite_rounded, color: Colors.white, size: 40),
-    );
-  }
-}
-
-class _FeatureRow extends StatelessWidget {
-  final _features = const [
-    (Icons.directions_walk_rounded, 'Steps'),
-    (Icons.fitness_center_rounded, 'Workouts'),
-    (Icons.restaurant_rounded, 'Meals'),
-    (Icons.medication_rounded, 'Meds'),
-    (Icons.bedtime_rounded, 'Sleep'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      alignment: WrapAlignment.center,
-      children: _features
-          .map((f) => _Chip(icon: f.$1, label: f.$2))
-          .toList(),
     );
   }
 }
@@ -165,9 +224,9 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.12),
+        color: _w12,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: _w20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -180,70 +239,6 @@ class _Chip extends StatelessWidget {
               color: Colors.white,
               fontSize: 13,
               fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SignInCard extends StatelessWidget {
-  final bool loading;
-  final VoidCallback onSignIn;
-  const _SignInCard({required this.loading, required this.onSignIn});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.11),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withOpacity(0.22), width: 1.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Get started',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Sign in to track and sync your health data',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.white.withOpacity(0.65),
-            ),
-          ),
-          const SizedBox(height: 28),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: loading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2.5,
-                    ),
-                  )
-                : _GoogleButton(onPressed: onSignIn),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: Text(
-              'Your data stays private and belongs to you.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white.withOpacity(0.45),
-              ),
             ),
           ),
         ],
@@ -268,28 +263,21 @@ class _GoogleButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
         ),
       ),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Google 'G' logo approximation
           Text(
             'G',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              foreground: Paint()
-                ..shader = const LinearGradient(
-                  colors: [Color(0xFF4285F4), Color(0xFF34A853)],
-                ).createShader(const Rect.fromLTWH(0, 0, 20, 20)),
+              color: Color(0xFF4285F4),
             ),
           ),
-          const SizedBox(width: 12),
-          const Text(
+          SizedBox(width: 12),
+          Text(
             'Continue with Google',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
         ],
       ),

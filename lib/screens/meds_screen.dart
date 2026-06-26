@@ -163,7 +163,7 @@ class _MedsScreenState extends State<MedsScreen> {
                     child: Card(
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: AppColors.meds.withOpacity(0.14),
+                          backgroundColor: const Color(0x247A5CC4), // meds @ 14%
                           child: const Icon(Icons.medication,
                               color: AppColors.meds),
                         ),

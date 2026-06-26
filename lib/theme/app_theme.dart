@@ -73,7 +73,7 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.surface,
-        indicatorColor: AppColors.teal.withOpacity(0.12),
+        indicatorColor: const Color(0x1F0E7C7B), // teal @ 12%
         labelTextStyle: WidgetStateProperty.all(
           const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
         ),

@@ -67,10 +67,44 @@ class _HomeScreenState extends State<HomeScreen> {
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
-                child: _Header(
-                  greeting: greeting,
-                  user: user,
-                  wide: wide,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              greeting,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: AppColors.inkSoft,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Your day',
+                              style:
+                                  Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              DateFormat('EEEE, MMMM d')
+                                  .format(DateTime.now()),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.inkSoft,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Avatar + sign-out (always visible; rail layout also shows it)
+                      _AccountButton(user: user),
+                    ],
+                  ),
                 ),
               ),
               SliverPadding(
@@ -79,7 +113,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   delegate: SliverChildListDelegate([
                     _DomainCard(
                       title: 'Steps',
-                      value: NumberFormat.decimalPattern().format(_steps),
+                      value:
+                          NumberFormat.decimalPattern().format(_steps),
                       unit: 'today',
                       icon: Icons.directions_walk_rounded,
                       color: AppColors.steps,
@@ -111,16 +146,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     _DomainCard(
                       title: 'Sleep',
-                      value: _sleep > 0
-                          ? _sleep.toStringAsFixed(1)
-                          : '—',
-                      unit: _sleep > 0 ? 'hrs last night' : 'not logged',
+                      value:
+                          _sleep > 0 ? _sleep.toStringAsFixed(1) : '—',
+                      unit:
+                          _sleep > 0 ? 'hrs last night' : 'not logged',
                       icon: Icons.bedtime_rounded,
                       color: AppColors.sleep,
                       onTap: () => _open(const SleepScreen()),
                     ),
                   ]),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate:
+                      SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: wide ? 3 : 2,
                     mainAxisSpacing: 14,
                     crossAxisSpacing: 14,
@@ -143,111 +179,76 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _Header extends StatelessWidget {
-  final String greeting;
+class _AccountButton extends StatelessWidget {
   final dynamic user;
-  final bool wide;
-
-  const _Header({
-    required this.greeting,
-    required this.user,
-    required this.wide,
-  });
+  const _AccountButton({required this.user});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  greeting,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: AppColors.inkSoft,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Your day',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  DateFormat('EEEE, MMMM d').format(DateTime.now()),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.inkSoft,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Show avatar/sign-out only on narrow screens (wide shows it in rail)
-          if (!wide)
-            PopupMenuButton<String>(
-              tooltip: 'Account',
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              itemBuilder: (_) => [
-                PopupMenuItem(
-                  enabled: false,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user?.displayName ?? 'User',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.ink,
-                        ),
-                      ),
-                      Text(
-                        user?.email ?? '',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.inkSoft,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const PopupMenuDivider(),
-                const PopupMenuItem(
-                  value: 'signout',
-                  child: Row(children: [
-                    Icon(Icons.logout_rounded,
-                        size: 18, color: AppColors.inkSoft),
-                    SizedBox(width: 10),
-                    Text('Sign out'),
-                  ]),
-                ),
-              ],
-              onSelected: (v) async {
-                if (v == 'signout') await AuthService.instance.signOut();
-              },
-              child: CircleAvatar(
-                radius: 22,
-                backgroundColor: AppColors.teal.withOpacity(0.12),
-                backgroundImage: user?.photoURL != null
-                    ? NetworkImage(user!.photoURL as String)
-                    : null,
-                child: user?.photoURL == null
-                    ? const Icon(Icons.person_rounded,
-                        color: AppColors.teal, size: 24)
-                    : null,
+    return PopupMenuButton<String>(
+      tooltip: 'Account',
+      shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          enabled: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                user?.displayName ?? 'User',
+                style: const TextStyle(
+                    fontWeight: FontWeight.w700, color: AppColors.ink),
               ),
-            ),
-        ],
+              Text(
+                user?.email ?? '',
+                style: const TextStyle(
+                    fontSize: 12, color: AppColors.inkSoft),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        const PopupMenuItem(
+          value: 'signout',
+          child: Row(
+            children: [
+              Icon(Icons.logout_rounded,
+                  size: 18, color: AppColors.inkSoft),
+              SizedBox(width: 10),
+              Text('Sign out'),
+            ],
+          ),
+        ),
+      ],
+      onSelected: (v) async {
+        if (v == 'signout') await AuthService.instance.signOut();
+      },
+      child: CircleAvatar(
+        radius: 22,
+        // const teal @ 12% alpha
+        backgroundColor: const Color(0x1F0E7C7B),
+        backgroundImage: (user?.photoURL as String?) != null
+            ? NetworkImage(user!.photoURL as String)
+            : null,
+        child: (user?.photoURL as String?) == null
+            ? const Icon(Icons.person_rounded,
+                color: AppColors.teal, size: 24)
+            : null,
       ),
     );
   }
 }
+
+// Extracted helper so _DomainCard can create semi-transparent domain colours
+// without calling the deprecated withOpacity method.
+Color _domainTint(Color c, int alpha255) => Color.fromARGB(
+      alpha255,
+      (c.value >> 16) & 0xFF,
+      (c.value >> 8) & 0xFF,
+      c.value & 0xFF,
+    );
 
 class _DomainCard extends StatelessWidget {
   final String title;
@@ -279,7 +280,7 @@ class _DomainCard extends StatelessWidget {
           border: Border.all(color: AppColors.line),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.06),
+              color: _domainTint(color, 15), // ~6%
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -293,8 +294,8 @@ class _DomainCard extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    color.withOpacity(0.18),
-                    color.withOpacity(0.10),
+                    _domainTint(color, 46), // ~18%
+                    _domainTint(color, 26), // ~10%
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -306,7 +307,7 @@ class _DomainCard extends StatelessWidget {
             const Spacer(),
             Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.8,
@@ -315,7 +316,8 @@ class _DomainCard extends StatelessWidget {
             ),
             Text(
               unit,
-              style: const TextStyle(fontSize: 12, color: AppColors.inkSoft),
+              style: const TextStyle(
+                  fontSize: 12, color: AppColors.inkSoft),
             ),
             const SizedBox(height: 4),
             Text(

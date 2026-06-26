@@ -63,7 +63,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     label: Text(t),
                     selected: sel,
                     onSelected: (_) => setSheet(() => type = t),
-                    selectedColor: AppColors.workout.withOpacity(0.18),
+                    selectedColor: const Color(0x2EF2682C), // workout @ 18%
                     labelStyle: TextStyle(
                       color: sel ? AppColors.workout : AppColors.ink,
                       fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
@@ -191,7 +191,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   child: Card(
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: AppColors.workout.withOpacity(0.14),
+                        backgroundColor: const Color(0x24F2682C), // workout @ 14%
                         child: Icon(_iconFor(w.type),
                             color: AppColors.workout),
                       ),

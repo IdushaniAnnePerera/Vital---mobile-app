@@ -66,7 +66,7 @@ class _MealsScreenState extends State<MealsScreen> {
                     label: Text(t),
                     selected: sel,
                     onSelected: (_) => setSheet(() => mealType = t),
-                    selectedColor: AppColors.meals.withOpacity(0.18),
+                    selectedColor: const Color(0x2E6A8E3C), // meals @ 18%
                     labelStyle: TextStyle(
                       color: sel ? AppColors.meals : AppColors.ink,
                       fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
@@ -181,7 +181,7 @@ class _MealsScreenState extends State<MealsScreen> {
                   child: Card(
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: AppColors.meals.withOpacity(0.14),
+                        backgroundColor: const Color(0x246A8E3C), // meals @ 14%
                         child: Text(m.mealType[0],
                             style: const TextStyle(
                                 color: AppColors.meals,

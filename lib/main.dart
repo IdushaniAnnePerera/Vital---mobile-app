@@ -85,49 +85,66 @@ class _RootShellState extends State<RootShell> {
     SleepScreen(),
   ];
 
-  static const _destinations = [
-    (Icons.dashboard_outlined, Icons.dashboard_rounded, 'Home'),
-    (Icons.directions_walk_outlined, Icons.directions_walk_rounded, 'Steps'),
-    (Icons.fitness_center_outlined, Icons.fitness_center_rounded, 'Workout'),
-    (Icons.restaurant_outlined, Icons.restaurant_rounded, 'Meals'),
-    (Icons.bedtime_outlined, Icons.bedtime_rounded, 'Sleep'),
-  ];
+  void _go(int i) => setState(() => _index = i);
 
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.of(context).size.width >= 700;
 
     if (wide) {
+      // Sidebar layout for web / wide screens
       return Scaffold(
         body: Row(
           children: [
-            NavigationRail(
-              selectedIndex: _index,
-              onDestinationSelected: (i) => setState(() => _index = i),
-              labelType: NavigationRailLabelType.all,
-              useIndicator: true,
-              indicatorColor: AppColors.teal.withOpacity(0.12),
-              backgroundColor: AppColors.surface,
-              leading: const SizedBox(height: 8),
-              trailing: Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: _AvatarMenu(),
+            // Rail + avatar stacked in a Column
+            Column(
+              children: [
+                Expanded(
+                  child: NavigationRail(
+                    selectedIndex: _index,
+                    onDestinationSelected: _go,
+                    labelType: NavigationRailLabelType.all,
+                    useIndicator: true,
+                    // const teal @ 12% alpha
+                    indicatorColor: const Color(0x1F0E7C7B),
+                    backgroundColor: AppColors.surface,
+                    destinations: const [
+                      NavigationRailDestination(
+                        icon: Icon(Icons.dashboard_outlined),
+                        selectedIcon: Icon(Icons.dashboard_rounded),
+                        label: Text('Home'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.directions_walk_outlined),
+                        selectedIcon: Icon(Icons.directions_walk_rounded),
+                        label: Text('Steps'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.fitness_center_outlined),
+                        selectedIcon: Icon(Icons.fitness_center_rounded),
+                        label: Text('Workout'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.restaurant_outlined),
+                        selectedIcon: Icon(Icons.restaurant_rounded),
+                        label: Text('Meals'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.bedtime_outlined),
+                        selectedIcon: Icon(Icons.bedtime_rounded),
+                        label: Text('Sleep'),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              destinations: _destinations
-                  .map((d) => NavigationRailDestination(
-                        icon: Icon(d.$1),
-                        selectedIcon: Icon(d.$2),
-                        label: Text(d.$3),
-                      ))
-                  .toList(),
+                const Divider(height: 1, color: AppColors.line),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: _AvatarMenu(),
+                ),
+              ],
             ),
-            const VerticalDivider(thickness: 1, width: 1,
-                color: AppColors.line),
+            const VerticalDivider(thickness: 1, width: 1, color: AppColors.line),
             Expanded(
               child: IndexedStack(index: _index, children: _pages),
             ),
@@ -136,18 +153,39 @@ class _RootShellState extends State<RootShell> {
       );
     }
 
+    // Bottom-bar layout for mobile / narrow screens
     return Scaffold(
       body: IndexedStack(index: _index, children: _pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: _destinations
-            .map((d) => NavigationDestination(
-                  icon: Icon(d.$1),
-                  selectedIcon: Icon(d.$2),
-                  label: d.$3,
-                ))
-            .toList(),
+        onDestinationSelected: _go,
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard_rounded),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.directions_walk_outlined),
+            selectedIcon: Icon(Icons.directions_walk_rounded),
+            label: 'Steps',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.fitness_center_outlined),
+            selectedIcon: Icon(Icons.fitness_center_rounded),
+            label: 'Workout',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.restaurant_outlined),
+            selectedIcon: Icon(Icons.restaurant_rounded),
+            label: 'Meals',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bedtime_outlined),
+            selectedIcon: Icon(Icons.bedtime_rounded),
+            label: 'Sleep',
+          ),
+        ],
       ),
     );
   }
@@ -159,31 +197,38 @@ class _AvatarMenu extends StatelessWidget {
     final user = AuthService.instance.currentUser;
     return PopupMenuButton<String>(
       tooltip: 'Account',
-      offset: const Offset(60, 0),
+      offset: const Offset(64, 0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       itemBuilder: (_) => [
         PopupMenuItem(
           enabled: false,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(user?.displayName ?? 'User',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w700, color: AppColors.ink)),
-              Text(user?.email ?? '',
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.inkSoft)),
+              Text(
+                user?.displayName ?? 'User',
+                style: const TextStyle(
+                    fontWeight: FontWeight.w700, color: AppColors.ink),
+              ),
+              Text(
+                user?.email ?? '',
+                style: const TextStyle(
+                    fontSize: 12, color: AppColors.inkSoft),
+              ),
             ],
           ),
         ),
         const PopupMenuDivider(),
         const PopupMenuItem(
           value: 'signout',
-          child: Row(children: [
-            Icon(Icons.logout_rounded, size: 18, color: AppColors.inkSoft),
-            SizedBox(width: 10),
-            Text('Sign out'),
-          ]),
+          child: Row(
+            children: [
+              Icon(Icons.logout_rounded, size: 18, color: AppColors.inkSoft),
+              SizedBox(width: 10),
+              Text('Sign out'),
+            ],
+          ),
         ),
       ],
       onSelected: (v) async {
@@ -191,13 +236,13 @@ class _AvatarMenu extends StatelessWidget {
       },
       child: CircleAvatar(
         radius: 20,
-        backgroundColor: AppColors.teal.withOpacity(0.12),
+        // const teal @ 12% alpha
+        backgroundColor: const Color(0x1F0E7C7B),
         backgroundImage: user?.photoURL != null
             ? NetworkImage(user!.photoURL!)
             : null,
         child: user?.photoURL == null
-            ? const Icon(Icons.person_rounded,
-                color: AppColors.teal, size: 22)
+            ? const Icon(Icons.person_rounded, color: AppColors.teal, size: 22)
             : null,
       ),
     );
